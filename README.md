@@ -4,7 +4,7 @@ A self-contained browser app for an educational MBTI-style 16 personality evalua
 
 ## Open the app
 
-Open `index.html` in any modern browser, or preview it directly from the workspace.
+Open `16-personalities.html` in any modern browser, or preview it directly from the workspace.
 
 ## Features
 
