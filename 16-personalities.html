@@ -1,0 +1,1142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>16 Personalities Evaluation App</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --surface-2: #eef2ff;
+      --text: #172033;
+      --muted: #647084;
+      --line: #dce3ef;
+      --primary: #6d5dfc;
+      --primary-2: #8a7cff;
+      --accent: #13b8a6;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 20px 60px rgba(23, 32, 51, .12);
+      --radius: 24px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0d1322;
+      --surface: #151d2f;
+      --surface-2: #10192c;
+      --text: #eef4ff;
+      --muted: #a7b2c6;
+      --line: #26334d;
+      --primary: #9b8cff;
+      --primary-2: #c4bbff;
+      --accent: #2dd4bf;
+      --warning: #fbbf24;
+      --danger: #fb7185;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .35);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(109, 93, 252, .22), transparent 34rem),
+        radial-gradient(circle at bottom right, rgba(19, 184, 166, .18), transparent 32rem),
+        var(--bg);
+      color: var(--text);
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--primary); }
+    .hidden { display: none !important; }
+
+    .app-shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 52px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow: 0 12px 30px rgba(109, 93, 252, .28);
+    }
+
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 24px rgba(23, 32, 51, .06);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); border-color: rgba(109, 93, 252, .55); }
+    .btn:active { transform: translateY(0); }
+    .btn.primary {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      box-shadow: 0 16px 36px rgba(109, 93, 252, .32);
+    }
+    .btn.ghost { background: transparent; box-shadow: none; }
+    .btn.danger { color: white; background: var(--danger); border-color: transparent; }
+    .btn:disabled { opacity: .48; cursor: not-allowed; transform: none; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .card {
+      background: rgba(255,255,255,.78);
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .card-pad { padding: 28px; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: var(--primary-2);
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+      font-size: .88rem;
+      font-weight: 700;
+    }
+
+    h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: -.045em; }
+    h1 { margin-top: 18px; font-size: clamp(2.2rem, 5vw, 4.6rem); }
+    h2 { font-size: clamp(1.8rem, 3vw, 3rem); }
+    h3 { font-size: 1.25rem; letter-spacing: -.025em; }
+    p { line-height: 1.65; color: var(--muted); }
+
+    .hero-lede { font-size: 1.08rem; max-width: 66ch; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .stat strong { display: block; font-size: 1.55rem; letter-spacing: -.04em; }
+    .stat span { color: var(--muted); font-size: .9rem; }
+
+    .panel-title { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+    .axis-mini {
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+    }
+    .axis-mini b { display: block; margin-bottom: 6px; }
+    .axis-mini span { color: var(--muted); font-size: .92rem; line-height: 1.45; }
+
+    .notice {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid color-mix(in srgb, var(--warning) 40%, var(--line));
+      background: color-mix(in srgb, var(--warning) 12%, transparent);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .resume-box {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--accent) 13%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .section { margin-top: 24px; }
+    .quiz-card { padding: 0; }
+
+    .quiz-header {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 14px;
+    }
+
+    .progress-row { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: .94rem; }
+    .progress-track {
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: inherit;
+      transition: width .25s ease;
+    }
+
+    .question-area {
+      padding: clamp(24px, 4vw, 42px);
+      display: grid;
+      gap: 24px;
+    }
+
+    .question-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .9rem;
+      font-weight: 700;
+    }
+    .question-text { font-size: clamp(1.55rem, 3vw, 2.45rem); line-height: 1.18; letter-spacing: -.04em; margin: 0; }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .option {
+      min-height: 112px;
+      padding: 14px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      display: grid;
+      align-content: center;
+      gap: 8px;
+      text-align: center;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .option:hover { transform: translateY(-2px); border-color: var(--primary); }
+    .option.selected {
+      background: color-mix(in srgb, var(--primary) 15%, var(--surface));
+      border-color: var(--primary);
+      box-shadow: 0 14px 34px color-mix(in srgb, var(--primary) 20%, transparent);
+    }
+    .option .score { font-size: 1.35rem; font-weight: 900; color: var(--primary); }
+    .option small { color: var(--muted); font-weight: 650; }
+
+    .quiz-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 20px 24px;
+      border-top: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+    }
+
+    .dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 18px 24px 0;
+    }
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      padding: 0;
+      box-shadow: none;
+    }
+    .dot.answered { background: color-mix(in srgb, var(--accent) 70%, var(--surface)); border-color: var(--accent); }
+    .dot.current { outline: 3px solid color-mix(in srgb, var(--primary) 30%, transparent); background: var(--primary); border-color: var(--primary); }
+
+    .result-hero {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .type-badge {
+      display: inline-grid;
+      place-items: center;
+      width: 156px;
+      height: 156px;
+      border-radius: 42px;
+      color: white;
+      font-size: 2.7rem;
+      font-weight: 950;
+      letter-spacing: .03em;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow: 0 24px 60px rgba(109, 93, 252, .3);
+      margin-bottom: 22px;
+    }
+
+    .tag-list, .list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .tag-list li, .pill {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .92rem;
+    }
+
+    .axis-results { display: grid; gap: 16px; }
+    .axis-row { display: grid; gap: 8px; }
+    .axis-labels { display: flex; justify-content: space-between; gap: 12px; font-size: .92rem; color: var(--muted); }
+    .axis-labels b { color: var(--text); }
+    .dual-bar {
+      position: relative;
+      height: 18px;
+      display: flex;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+    }
+    .dual-left { background: linear-gradient(90deg, var(--primary), var(--primary-2)); }
+    .dual-right { background: linear-gradient(90deg, var(--accent), #22c55e); }
+    .midline {
+      position: absolute;
+      left: 50%; top: -2px; bottom: -2px;
+      width: 2px;
+      background: color-mix(in srgb, var(--text) 42%, transparent);
+    }
+
+    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .info-card {
+      padding: 22px;
+      border-radius: 22px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+    .info-card ul { margin: 14px 0 0; padding-left: 20px; color: var(--muted); line-height: 1.6; }
+    .info-card li + li { margin-top: 8px; }
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .type-card {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .type-card strong { display: block; font-size: 1.12rem; letter-spacing: .02em; }
+    .type-card span { display: block; margin-top: 3px; color: var(--primary); font-weight: 800; font-size: .9rem; }
+    .type-card p { margin: 8px 0 0; font-size: .9rem; line-height: 1.45; }
+
+    .footer-note { margin-top: 28px; text-align: center; font-size: .92rem; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: var(--text);
+      color: var(--bg);
+      box-shadow: var(--shadow);
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 20;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 900px) {
+      .hero, .result-hero { grid-template-columns: 1fr; }
+      .result-grid, .type-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .options { grid-template-columns: 1fr; }
+      .option { min-height: unset; grid-template-columns: 48px 1fr; text-align: left; align-items: center; }
+      .stats { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .app-shell { width: min(100% - 20px, 1120px); padding-top: 14px; }
+      .topbar { align-items: flex-start; }
+      .brand span { display: none; }
+      .card-pad, .question-area { padding: 20px; }
+      .mini-grid, .result-grid, .type-grid { grid-template-columns: 1fr; }
+      .type-badge { width: 128px; height: 128px; border-radius: 34px; font-size: 2.15rem; }
+    }
+
+    @media print {
+      body { background: white; color: #111827; }
+      .topbar, .hero-actions, .quiz-footer, #allTypesIntro, #retakeBtn, #editAnswersBtn, #copyBtn, #downloadBtn, #printBtn { display: none !important; }
+      .card { box-shadow: none; border-color: #d1d5db; }
+      .section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="App brand">
+        <div class="brand-mark" aria-hidden="true">16</div>
+        <span>Personality Evaluation</span>
+      </div>
+      <div class="top-actions">
+        <button class="btn ghost" id="themeBtn" type="button" aria-label="Toggle color theme">🌙 Theme</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="introScreen">
+        <div class="hero">
+          <article class="card card-pad">
+            <span class="eyebrow">✨ Educational 16-type assessment</span>
+            <h1>Discover your likely personality type.</h1>
+            <p class="hero-lede">Answer 48 quick statements and receive a four-letter type, preference-strength bars, strengths, growth tips, and a practical work-style summary.</p>
+            <div class="hero-actions">
+              <button class="btn primary" id="startBtn" type="button">Start evaluation</button>
+              <button class="btn" id="sampleBtn" type="button">View all 16 types</button>
+            </div>
+            <div class="stats" aria-label="Assessment stats">
+              <div class="stat"><strong>48</strong><span>Likert questions</span></div>
+              <div class="stat"><strong>4</strong><span>Personality dimensions</span></div>
+              <div class="stat"><strong>~8 min</strong><span>Typical completion</span></div>
+            </div>
+            <div class="resume-box hidden" id="resumeBox">
+              <div>
+                <strong>Progress found</strong>
+                <div id="resumeText" style="color: var(--muted); margin-top: 4px;"></div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn primary" id="resumeBtn" type="button">Resume</button>
+                <button class="btn" id="discardBtn" type="button">Discard</button>
+              </div>
+            </div>
+          </article>
+
+          <aside class="card card-pad">
+            <div class="panel-title">
+              <h3>What is measured?</h3>
+              <span class="chip">E/I · S/N · T/F · J/P</span>
+            </div>
+            <div class="mini-grid">
+              <div class="axis-mini"><b>Energy</b><span>Extraversion ↔ Introversion</span></div>
+              <div class="axis-mini"><b>Information</b><span>Sensing ↔ Intuition</span></div>
+              <div class="axis-mini"><b>Decisions</b><span>Thinking ↔ Feeling</span></div>
+              <div class="axis-mini"><b>Structure</b><span>Judging ↔ Perceiving</span></div>
+            </div>
+            <div class="notice"><strong>Note:</strong> This app is inspired by Jungian/MBTI-style type theory. It is not the official MBTI instrument and should be used for reflection, coaching, or team discussion—not diagnosis or hiring decisions.</div>
+          </aside>
+        </div>
+
+        <section class="section card card-pad hidden" id="allTypesIntro">
+          <div class="panel-title">
+            <h2>All 16 type snapshots</h2>
+            <button class="btn" id="hideTypesBtn" type="button">Hide</button>
+          </div>
+          <div class="type-grid" id="introTypeGrid"></div>
+        </section>
+      </section>
+
+      <section id="quizScreen" class="hidden">
+        <article class="card quiz-card">
+          <div class="quiz-header">
+            <div class="progress-row">
+              <span id="progressLabel">Question 1 of 48</span>
+              <span id="answeredLabel">0 answered</span>
+            </div>
+            <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+          </div>
+          <div class="dots" id="questionDots" aria-label="Question navigation"></div>
+          <div class="question-area">
+            <div class="question-meta">
+              <span class="chip" id="axisChip">Dimension</span>
+              <span class="chip">Use keys 1–5 to answer</span>
+            </div>
+            <p class="question-text" id="questionText"></p>
+            <div class="options" id="options" role="radiogroup" aria-label="Answer options"></div>
+          </div>
+          <div class="quiz-footer">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn" id="backBtn" type="button">← Back</button>
+              <button class="btn ghost" id="exitBtn" type="button">Save & exit</button>
+            </div>
+            <button class="btn primary" id="nextBtn" type="button">Next →</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="resultScreen" class="hidden">
+        <div class="result-hero">
+          <article class="card card-pad">
+            <div class="type-badge" id="typeBadge">INTJ</div>
+            <h2 id="typeTitle">Type title</h2>
+            <p id="typeSummary"></p>
+            <ul class="tag-list" id="typeTags"></ul>
+            <div class="hero-actions">
+              <button class="btn primary" id="retakeBtn" type="button">Retake</button>
+              <button class="btn" id="editAnswersBtn" type="button">Edit answers</button>
+            </div>
+          </article>
+          <article class="card card-pad">
+            <div class="panel-title">
+              <h3>Your preference balance</h3>
+              <span class="chip" id="completedAt">Completed now</span>
+            </div>
+            <div class="axis-results" id="axisResults"></div>
+            <div class="notice hidden" id="balanceNote"></div>
+          </article>
+        </div>
+
+        <section class="section result-grid" id="detailCards"></section>
+
+        <section class="section card card-pad">
+          <div class="panel-title">
+            <h2>Result actions</h2>
+          </div>
+          <div class="hero-actions">
+            <button class="btn" id="copyBtn" type="button">Copy summary</button>
+            <button class="btn" id="downloadBtn" type="button">Download JSON</button>
+            <button class="btn" id="printBtn" type="button">Print / save PDF</button>
+          </div>
+          <p class="footer-note">For the best insight, compare your result with real-life feedback and situations where you feel most energized, capable, and authentic.</p>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = 'arena-16-personality-evaluation-v1';
+    const THEME_KEY = 'arena-16-personality-theme';
+
+    const axes = {
+      EI: { left: 'E', right: 'I', leftLabel: 'Extraversion', rightLabel: 'Introversion', theme: 'Energy source' },
+      SN: { left: 'S', right: 'N', leftLabel: 'Sensing', rightLabel: 'Intuition', theme: 'Information style' },
+      TF: { left: 'T', right: 'F', leftLabel: 'Thinking', rightLabel: 'Feeling', theme: 'Decision style' },
+      JP: { left: 'J', right: 'P', leftLabel: 'Judging', rightLabel: 'Perceiving', theme: 'Structure style' }
+    };
+
+    const scale = [
+      { value: -2, label: 'Strongly disagree', symbol: '1' },
+      { value: -1, label: 'Disagree', symbol: '2' },
+      { value: 0, label: 'Neutral / depends', symbol: '3' },
+      { value: 1, label: 'Agree', symbol: '4' },
+      { value: 2, label: 'Strongly agree', symbol: '5' }
+    ];
+
+    const questions = [
+      { axis: 'EI', pole: 'E', text: 'After a demanding week, social plans can still give me energy.' },
+      { axis: 'SN', pole: 'S', text: 'I trust information most when it is concrete, observable, and proven.' },
+      { axis: 'TF', pole: 'T', text: 'I prefer decisions that are logically consistent, even when they are uncomfortable.' },
+      { axis: 'JP', pole: 'J', text: 'I like to know the plan before I commit my time or energy.' },
+      { axis: 'EI', pole: 'I', text: 'I do my best thinking when I have uninterrupted time alone.' },
+      { axis: 'SN', pole: 'N', text: 'I naturally look for patterns, meanings, and future possibilities.' },
+      { axis: 'TF', pole: 'F', text: 'Before deciding, I first consider how people will be affected.' },
+      { axis: 'JP', pole: 'P', text: 'I prefer to keep options open rather than lock in a plan early.' },
+      { axis: 'EI', pole: 'E', text: 'I often understand my thoughts by talking them through with others.' },
+      { axis: 'SN', pole: 'S', text: 'Practical details matter more to me than abstract possibilities.' },
+      { axis: 'TF', pole: 'T', text: 'When giving feedback, I value being direct and precise.' },
+      { axis: 'JP', pole: 'J', text: 'A clear checklist or schedule helps me feel calm and productive.' },
+      { axis: 'EI', pole: 'I', text: 'Too much group interaction leaves me needing quiet recovery time.' },
+      { axis: 'SN', pole: 'N', text: 'I enjoy imagining what could be, even before the facts are complete.' },
+      { axis: 'TF', pole: 'F', text: 'I would rather preserve trust than win an argument.' },
+      { axis: 'JP', pole: 'P', text: 'Unexpected changes can make a day more interesting for me.' },
+      { axis: 'EI', pole: 'E', text: 'I am usually comfortable starting conversations with new people.' },
+      { axis: 'SN', pole: 'S', text: 'I learn best from examples, demonstrations, and hands-on practice.' },
+      { axis: 'TF', pole: 'T', text: 'I separate personal feelings from the problem when analyzing a situation.' },
+      { axis: 'JP', pole: 'J', text: 'I would rather finish tasks early than work close to a deadline.' },
+      { axis: 'EI', pole: 'I', text: 'I prefer a few deep relationships over a wide circle of acquaintances.' },
+      { axis: 'SN', pole: 'N', text: 'I get bored when a conversation stays only on literal facts.' },
+      { axis: 'TF', pole: 'F', text: 'A solution feels incomplete if it ignores people’s values and emotions.' },
+      { axis: 'JP', pole: 'P', text: 'I do some of my best work when I can improvise as I go.' },
+      { axis: 'EI', pole: 'E', text: 'Fast-paced environments with visible activity tend to motivate me.' },
+      { axis: 'SN', pole: 'S', text: 'I notice what is realistic and immediately useful in an idea.' },
+      { axis: 'TF', pole: 'T', text: 'Fairness means applying the same standards to everyone.' },
+      { axis: 'JP', pole: 'J', text: 'I feel satisfied when decisions are made and loose ends are closed.' },
+      { axis: 'EI', pole: 'I', text: 'I prefer to reflect before responding, especially in important conversations.' },
+      { axis: 'SN', pole: 'N', text: 'I am drawn to concepts, symbols, and big-picture connections.' },
+      { axis: 'TF', pole: 'F', text: 'Fairness means considering each person’s context and needs.' },
+      { axis: 'JP', pole: 'P', text: 'I dislike feeling boxed in by too many rules or fixed procedures.' },
+      { axis: 'EI', pole: 'E', text: 'Collaborating live with others often helps me gain momentum.' },
+      { axis: 'SN', pole: 'S', text: 'I prefer instructions that are specific, sequential, and grounded.' },
+      { axis: 'TF', pole: 'T', text: 'I am comfortable challenging ideas if the reasoning seems weak.' },
+      { axis: 'JP', pole: 'J', text: 'I like arranging my space, files, or calendar so things are easy to find.' },
+      { axis: 'EI', pole: 'I', text: 'I would rather write or think privately before sharing an opinion.' },
+      { axis: 'SN', pole: 'N', text: 'I often see several interpretations of the same event.' },
+      { axis: 'TF', pole: 'F', text: 'I pay close attention to tone and harmony in a group.' },
+      { axis: 'JP', pole: 'P', text: 'I can stay relaxed even when not everything is decided yet.' },
+      { axis: 'EI', pole: 'E', text: 'Meeting new people usually feels stimulating rather than draining.' },
+      { axis: 'SN', pole: 'S', text: 'I value proven methods more than experimental approaches.' },
+      { axis: 'TF', pole: 'T', text: 'I am more persuaded by evidence than by personal appeal.' },
+      { axis: 'JP', pole: 'J', text: 'I prefer to define goals, milestones, and responsibilities upfront.' },
+      { axis: 'EI', pole: 'I', text: 'I need solitude to reconnect with myself after busy periods.' },
+      { axis: 'SN', pole: 'N', text: 'I enjoy brainstorming unusual ideas, even if some are impractical.' },
+      { axis: 'TF', pole: 'F', text: 'I am motivated when work aligns with human purpose and personal values.' },
+      { axis: 'JP', pole: 'P', text: 'I prefer flexible timelines that let me respond to new information.' }
+    ];
+
+    const typeData = {
+      ISTJ: {
+        title: 'The Logistician',
+        subtitle: 'Dependable, precise, duty-minded',
+        summary: 'ISTJs tend to bring order, responsibility, and follow-through. They trust proven methods, respect commitments, and prefer clarity over ambiguity.',
+        tags: ['Reliable', 'Methodical', 'Practical'],
+        strengths: ['Creates stable systems and routines', 'Honors responsibilities and deadlines', 'Notices important details others miss', 'Builds trust through consistency'],
+        growth: ['Leave space for new methods when evidence supports them', 'Share reasoning instead of assuming standards are obvious', 'Balance duty with rest and flexibility', 'Invite emotional context into decisions'],
+        environment: ['Clear expectations', 'Defined roles', 'Practical goals']
+      },
+      ISFJ: {
+        title: 'The Defender',
+        subtitle: 'Supportive, observant, loyal',
+        summary: 'ISFJs often combine practical care with quiet dedication. They remember details, protect stability, and notice what people need.',
+        tags: ['Helpful', 'Loyal', 'Considerate'],
+        strengths: ['Creates warm and dependable support', 'Remembers practical details and preferences', 'Works patiently behind the scenes', 'Protects traditions and relationships'],
+        growth: ['Ask directly for what you need', 'Set boundaries before resentment builds', 'Accept appreciation without minimizing yourself', 'Try change in small, safe experiments'],
+        environment: ['Trusting teams', 'Meaningful service', 'Predictable structure']
+      },
+      INFJ: {
+        title: 'The Advocate',
+        subtitle: 'Insightful, principled, visionary',
+        summary: 'INFJs tend to search for meaning and long-range impact. They combine empathy with conviction and often see hidden patterns in people and systems.',
+        tags: ['Insightful', 'Purposeful', 'Empathic'],
+        strengths: ['Understands complex human dynamics', 'Connects daily action to a larger purpose', 'Communicates with depth and care', 'Persists for values-driven goals'],
+        growth: ['Test insights with real-world feedback', 'Avoid carrying everyone’s emotions alone', 'Share expectations before disappointment grows', 'Make room for imperfect progress'],
+        environment: ['Purpose-led work', 'Deep collaboration', 'Quiet focus time']
+      },
+      INTJ: {
+        title: 'The Architect',
+        subtitle: 'Strategic, independent, systems-minded',
+        summary: 'INTJs often look for the underlying design of a problem. They value competence, long-range planning, and elegant solutions.',
+        tags: ['Strategic', 'Analytical', 'Independent'],
+        strengths: ['Builds coherent long-term strategies', 'Improves inefficient systems', 'Learns complex topics independently', 'Challenges assumptions with logic'],
+        growth: ['Communicate warmth as well as competence', 'Prototype before perfecting the whole model', 'Invite input earlier in the process', 'Notice when standards become unrealistic'],
+        environment: ['Autonomy', 'Complex problems', 'High competence']
+      },
+      ISTP: {
+        title: 'The Virtuoso',
+        subtitle: 'Adaptable, hands-on, analytical',
+        summary: 'ISTPs tend to understand systems by interacting with them directly. They are calm troubleshooters who prefer freedom, precision, and practical action.',
+        tags: ['Tactical', 'Independent', 'Resourceful'],
+        strengths: ['Solves immediate problems under pressure', 'Learns through hands-on experimentation', 'Stays calm in uncertainty', 'Uses tools and data efficiently'],
+        growth: ['Explain your thinking before acting alone', 'Consider long-term people impact', 'Document key decisions for others', 'Commit when flexibility is no longer useful'],
+        environment: ['Freedom to troubleshoot', 'Real tools', 'Minimal bureaucracy']
+      },
+      ISFP: {
+        title: 'The Adventurer',
+        subtitle: 'Gentle, aesthetic, values-led',
+        summary: 'ISFPs often move through life with quiet sensitivity and personal authenticity. They respond to what feels real, beautiful, useful, and humane.',
+        tags: ['Authentic', 'Flexible', 'Sensitive'],
+        strengths: ['Brings beauty and humanity to practical work', 'Adapts to the present moment', 'Supports others without controlling them', 'Acts from deeply held values'],
+        growth: ['Name your priorities before others define them', 'Practice direct conflict in safe ways', 'Plan enough to protect your freedom', 'Let your work be seen before it feels perfect'],
+        environment: ['Creative freedom', 'Kind people', 'Hands-on impact']
+      },
+      INFP: {
+        title: 'The Mediator',
+        subtitle: 'Idealistic, imaginative, compassionate',
+        summary: 'INFPs tend to be guided by inner values and possibilities for growth. They seek authenticity, meaning, and humane ways forward.',
+        tags: ['Idealistic', 'Creative', 'Compassionate'],
+        strengths: ['Understands personal meaning and motivation', 'Imagines alternatives others overlook', 'Advocates for authenticity and fairness', 'Builds trust through sincerity'],
+        growth: ['Turn ideals into small next actions', 'Separate criticism of work from criticism of self', 'Share needs before withdrawing', 'Use structure as a tool for your values'],
+        environment: ['Meaningful mission', 'Creative expression', 'Psychological safety']
+      },
+      INTP: {
+        title: 'The Thinker',
+        subtitle: 'Curious, logical, concept-driven',
+        summary: 'INTPs often explore ideas for their own sake. They enjoy models, precision, and discovering how concepts fit together.',
+        tags: ['Curious', 'Logical', 'Inventive'],
+        strengths: ['Analyzes problems from first principles', 'Finds elegant conceptual connections', 'Questions weak assumptions', 'Learns deeply and independently'],
+        growth: ['Translate ideas into practical next steps', 'Share partial thoughts instead of waiting for perfect clarity', 'Consider emotional timing when debating', 'Finish useful versions before chasing new questions'],
+        environment: ['Intellectual freedom', 'Complex puzzles', 'Low micromanagement']
+      },
+      ESTP: {
+        title: 'The Entrepreneur',
+        subtitle: 'Energetic, practical, action-oriented',
+        summary: 'ESTPs tend to learn by doing and adapt quickly to what is happening now. They are direct, resourceful, and comfortable taking calculated risks.',
+        tags: ['Bold', 'Pragmatic', 'Fast-moving'],
+        strengths: ['Acts quickly when opportunities appear', 'Reads immediate realities accurately', 'Negotiates and improvises well', 'Keeps energy high in changing situations'],
+        growth: ['Pause to consider long-term consequences', 'Listen for quieter voices in the room', 'Follow through after the exciting part ends', 'Use data before escalating risk'],
+        environment: ['Fast feedback', 'Visible results', 'Autonomy to act']
+      },
+      ESFP: {
+        title: 'The Entertainer',
+        subtitle: 'Expressive, warm, experience-led',
+        summary: 'ESFPs often bring aliveness, connection, and practical optimism. They notice people and opportunities in the moment.',
+        tags: ['Expressive', 'Sociable', 'Present'],
+        strengths: ['Creates positive energy and belonging', 'Responds quickly to practical needs', 'Learns through experience', 'Makes ideas feel accessible and human'],
+        growth: ['Plan for future trade-offs before committing', 'Protect focus from constant stimulation', 'Invite honest feedback, not only encouragement', 'Complete important routines even when boring'],
+        environment: ['People-centered work', 'Variety', 'Room to express']
+      },
+      ENFP: {
+        title: 'The Campaigner',
+        subtitle: 'Enthusiastic, imaginative, people-focused',
+        summary: 'ENFPs tend to generate possibilities and energize people around meaningful ideas. They value freedom, authenticity, and growth.',
+        tags: ['Inspiring', 'Creative', 'Values-led'],
+        strengths: ['Connects ideas, people, and opportunities', 'Encourages others to grow', 'Communicates with energy and warmth', 'Sees potential before it is obvious'],
+        growth: ['Prioritize before starting another possibility', 'Create simple systems for follow-through', 'Check assumptions with concrete facts', 'Rest before enthusiasm becomes overextension'],
+        environment: ['Mission and variety', 'Collaborative freedom', 'Creative problem solving']
+      },
+      ENTP: {
+        title: 'The Debater',
+        subtitle: 'Inventive, strategic, intellectually playful',
+        summary: 'ENTPs often enjoy challenging assumptions and exploring alternatives. They are energized by novelty, debate, and clever solutions.',
+        tags: ['Inventive', 'Questioning', 'Adaptable'],
+        strengths: ['Generates unconventional solutions', 'Spots weak logic and hidden options', 'Adapts quickly in debate or change', 'Brings momentum to new ideas'],
+        growth: ['Choose which ideas deserve sustained execution', 'Signal care when challenging others', 'Respect useful constraints', 'Finish the boring but necessary details'],
+        environment: ['Innovation', 'Debate', 'Flexible roles']
+      },
+      ESTJ: {
+        title: 'The Executive',
+        subtitle: 'Organized, decisive, results-focused',
+        summary: 'ESTJs tend to turn goals into plans, standards, and measurable progress. They value responsibility, efficiency, and clear authority.',
+        tags: ['Decisive', 'Organized', 'Practical'],
+        strengths: ['Clarifies roles and expectations', 'Drives execution and accountability', 'Uses proven processes effectively', 'Makes tough decisions when needed'],
+        growth: ['Invite input before finalizing the plan', 'Notice when efficiency costs morale', 'Allow exceptions when context matters', 'Balance critique with encouragement'],
+        environment: ['Clear goals', 'Accountability', 'Operational leadership']
+      },
+      ESFJ: {
+        title: 'The Consul',
+        subtitle: 'Warm, organized, community-minded',
+        summary: 'ESFJs often create belonging through practical support and social awareness. They value cooperation, reliability, and shared standards.',
+        tags: ['Supportive', 'Responsible', 'Relational'],
+        strengths: ['Builds team cohesion and care', 'Coordinates practical needs smoothly', 'Remembers social details and commitments', 'Creates welcoming routines'],
+        growth: ['Avoid taking disagreement personally', 'Make room for unconventional approaches', 'Set limits on emotional labor', 'Ask what is true, not only what keeps peace'],
+        environment: ['Cooperative teams', 'Service', 'Clear social norms']
+      },
+      ENFJ: {
+        title: 'The Protagonist',
+        subtitle: 'Charismatic, empathic, growth-oriented',
+        summary: 'ENFJs tend to mobilize people around shared values and development. They are attentive to group dynamics and often lead through encouragement.',
+        tags: ['Mentoring', 'Visionary', 'Warm'],
+        strengths: ['Inspires commitment to a shared purpose', 'Reads emotional dynamics quickly', 'Develops others’ confidence and talent', 'Communicates values persuasively'],
+        growth: ['Let others own their choices and discomfort', 'Check facts before moving with conviction', 'Protect private recovery time', 'Receive criticism without over-personalizing it'],
+        environment: ['People development', 'Purposeful leadership', 'Collaborative culture']
+      },
+      ENTJ: {
+        title: 'The Commander',
+        subtitle: 'Strategic, assertive, outcome-driven',
+        summary: 'ENTJs often organize people and resources toward ambitious goals. They value competence, challenge, and decisive movement.',
+        tags: ['Strategic', 'Commanding', 'Efficient'],
+        strengths: ['Sets bold direction and priorities', 'Cuts through confusion to decisions', 'Builds scalable systems and teams', 'Raises standards and performance'],
+        growth: ['Make space for emotional and relational data', 'Listen before optimizing', 'Celebrate progress, not only outcomes', 'Distinguish urgency from impatience'],
+        environment: ['Big goals', 'Authority to execute', 'High standards']
+      }
+    };
+
+    let state = {
+      started: false,
+      completed: false,
+      current: 0,
+      answers: Array(questions.length).fill(null),
+      completedAt: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function init() {
+      applyTheme();
+      renderTypeGrid();
+      const saved = loadState();
+      if (saved) {
+        state = normalizeState(saved);
+        if (state.completed) showResult();
+        else if (state.started) showResumeBox();
+      }
+      bindEvents();
+    }
+
+    function bindEvents() {
+      $('themeBtn').addEventListener('click', toggleTheme);
+      $('startBtn').addEventListener('click', () => startEvaluation(true));
+      $('resumeBtn').addEventListener('click', () => startEvaluation(false));
+      $('discardBtn').addEventListener('click', () => { clearSaved(); resetState(); hideResumeBox(); toast('Saved progress discarded.'); });
+      $('sampleBtn').addEventListener('click', () => $('allTypesIntro').classList.remove('hidden'));
+      $('hideTypesBtn').addEventListener('click', () => $('allTypesIntro').classList.add('hidden'));
+      $('backBtn').addEventListener('click', goBack);
+      $('nextBtn').addEventListener('click', goNext);
+      $('exitBtn').addEventListener('click', () => { saveState(); showScreen('intro'); showResumeBox(); toast('Progress saved.'); });
+      $('retakeBtn').addEventListener('click', () => startEvaluation(true));
+      $('editAnswersBtn').addEventListener('click', () => { state.completed = false; saveState(); showScreen('quiz'); renderQuestion(); });
+      $('copyBtn').addEventListener('click', copySummary);
+      $('downloadBtn').addEventListener('click', downloadResult);
+      $('printBtn').addEventListener('click', () => window.print());
+      document.addEventListener('keydown', handleKeys);
+    }
+
+    function normalizeState(saved) {
+      const answers = Array.isArray(saved.answers) ? saved.answers.slice(0, questions.length) : [];
+      while (answers.length < questions.length) answers.push(null);
+      return {
+        started: Boolean(saved.started),
+        completed: Boolean(saved.completed),
+        current: Math.min(Math.max(Number(saved.current) || 0, 0), questions.length - 1),
+        answers,
+        completedAt: saved.completedAt || null
+      };
+    }
+
+    function resetState() {
+      state = { started: false, completed: false, current: 0, answers: Array(questions.length).fill(null), completedAt: null };
+    }
+
+    function showResumeBox() {
+      const answered = state.answers.filter((v) => v !== null).length;
+      $('resumeText').textContent = `${answered} of ${questions.length} answered.`;
+      $('resumeBox').classList.remove('hidden');
+    }
+
+    function hideResumeBox() { $('resumeBox').classList.add('hidden'); }
+
+    function startEvaluation(fresh) {
+      if (fresh) resetState();
+      state.started = true;
+      state.completed = false;
+      if (fresh) state.current = 0;
+      hideResumeBox();
+      saveState();
+      showScreen('quiz');
+      renderQuestion();
+    }
+
+    function showScreen(name) {
+      $('introScreen').classList.toggle('hidden', name !== 'intro');
+      $('quizScreen').classList.toggle('hidden', name !== 'quiz');
+      $('resultScreen').classList.toggle('hidden', name !== 'result');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderQuestion() {
+      const q = questions[state.current];
+      const answered = state.answers.filter((v) => v !== null).length;
+      $('progressLabel').textContent = `Question ${state.current + 1} of ${questions.length}`;
+      $('answeredLabel').textContent = `${answered} answered`;
+      $('progressFill').style.width = `${Math.round((answered / questions.length) * 100)}%`;
+      const axis = axes[q.axis];
+      $('axisChip').textContent = `${axis.theme}: ${axis.leftLabel} ↔ ${axis.rightLabel}`;
+      $('questionText').textContent = q.text;
+      renderOptions();
+      renderDots();
+      $('backBtn').disabled = state.current === 0;
+      $('nextBtn').textContent = state.current === questions.length - 1 ? 'See results →' : 'Next →';
+      $('nextBtn').disabled = state.answers[state.current] === null;
+    }
+
+    function renderOptions() {
+      const selected = state.answers[state.current];
+      $('options').innerHTML = scale.map((item) => `
+        <button type="button" class="option ${selected === item.value ? 'selected' : ''}" data-value="${item.value}" role="radio" aria-checked="${selected === item.value}">
+          <span class="score">${item.symbol}</span>
+          <small>${item.label}</small>
+        </button>
+      `).join('');
+      Array.from($('options').querySelectorAll('.option')).forEach((btn) => {
+        btn.addEventListener('click', () => selectAnswer(Number(btn.dataset.value)));
+      });
+    }
+
+    function renderDots() {
+      $('questionDots').innerHTML = questions.map((_, index) => {
+        const classes = ['dot'];
+        if (state.answers[index] !== null) classes.push('answered');
+        if (index === state.current) classes.push('current');
+        return `<button type="button" class="${classes.join(' ')}" data-index="${index}" aria-label="Go to question ${index + 1}"></button>`;
+      }).join('');
+      Array.from($('questionDots').querySelectorAll('.dot')).forEach((dot) => {
+        dot.addEventListener('click', () => { state.current = Number(dot.dataset.index); saveState(); renderQuestion(); });
+      });
+    }
+
+    function selectAnswer(value) {
+      state.answers[state.current] = value;
+      saveState();
+      renderQuestion();
+    }
+
+    function goBack() {
+      if (state.current > 0) {
+        state.current -= 1;
+        saveState();
+        renderQuestion();
+      }
+    }
+
+    function goNext() {
+      if (state.answers[state.current] === null) {
+        toast('Choose an answer to continue.');
+        return;
+      }
+      if (state.current < questions.length - 1) {
+        state.current += 1;
+        saveState();
+        renderQuestion();
+        return;
+      }
+      const missing = state.answers.findIndex((v) => v === null);
+      if (missing >= 0) {
+        state.current = missing;
+        renderQuestion();
+        toast('Please answer every question first.');
+        return;
+      }
+      state.completed = true;
+      state.completedAt = new Date().toISOString();
+      saveState();
+      showResult();
+    }
+
+    function handleKeys(event) {
+      if ($('quizScreen').classList.contains('hidden')) return;
+      if (event.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
+      if (['1', '2', '3', '4', '5'].includes(event.key)) {
+        event.preventDefault();
+        selectAnswer(scale[Number(event.key) - 1].value);
+      } else if (event.key === 'ArrowRight' || event.key === 'Enter') {
+        event.preventDefault();
+        goNext();
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        goBack();
+      }
+    }
+
+    function calculateResult() {
+      const raw = { EI: 0, SN: 0, TF: 0, JP: 0 };
+      const max = { EI: 0, SN: 0, TF: 0, JP: 0 };
+      questions.forEach((q, index) => {
+        const value = Number(state.answers[index] || 0);
+        const axis = axes[q.axis];
+        const oriented = q.pole === axis.left ? value : -value;
+        raw[q.axis] += oriented;
+        max[q.axis] += 2;
+      });
+
+      let code = '';
+      const balances = Object.keys(axes).map((key) => {
+        const axis = axes[key];
+        const normalized = max[key] ? raw[key] / max[key] : 0;
+        const leftPct = Math.max(0, Math.min(100, Math.round(((normalized + 1) / 2) * 100)));
+        const rightPct = 100 - leftPct;
+        const letter = raw[key] >= 0 ? axis.left : axis.right;
+        const label = letter === axis.left ? axis.leftLabel : axis.rightLabel;
+        const strength = Math.max(leftPct, rightPct);
+        code += letter;
+        return { key, ...axis, raw: raw[key], max: max[key], leftPct, rightPct, letter, label, strength };
+      });
+
+      return { code, balances, type: typeData[code] };
+    }
+
+    function showResult() {
+      const result = calculateResult();
+      const data = result.type || typeData.INTJ;
+      $('typeBadge').textContent = result.code;
+      $('typeTitle').textContent = `${data.title} · ${data.subtitle}`;
+      $('typeSummary').textContent = data.summary;
+      $('typeTags').innerHTML = data.tags.map((tag) => `<li>${tag}</li>`).join('');
+      $('completedAt').textContent = state.completedAt ? `Completed ${new Date(state.completedAt).toLocaleDateString()}` : 'Completed';
+
+      $('axisResults').innerHTML = result.balances.map((b) => `
+        <div class="axis-row">
+          <div class="axis-labels">
+            <span><b>${b.left}</b> ${b.leftLabel} · ${b.leftPct}%</span>
+            <span>${b.rightPct}% · ${b.rightLabel} <b>${b.right}</b></span>
+          </div>
+          <div class="dual-bar" aria-label="${b.leftLabel} ${b.leftPct} percent, ${b.rightLabel} ${b.rightPct} percent">
+            <div class="dual-left" style="width:${b.leftPct}%"></div>
+            <div class="dual-right" style="width:${b.rightPct}%"></div>
+            <div class="midline"></div>
+          </div>
+          <div class="axis-labels"><span>Preference: <b>${b.label}</b></span><span>Strength: <b>${b.strength}%</b></span></div>
+        </div>
+      `).join('');
+
+      const balanced = result.balances.filter((b) => b.strength <= 55);
+      if (balanced.length) {
+        $('balanceNote').innerHTML = `<strong>Balanced dimension${balanced.length > 1 ? 's' : ''}:</strong> ${balanced.map((b) => `${b.left}/${b.right}`).join(', ')}. Your preference is close to the middle, so context may strongly influence this part of your style.`;
+        $('balanceNote').classList.remove('hidden');
+      } else {
+        $('balanceNote').classList.add('hidden');
+      }
+
+      $('detailCards').innerHTML = [
+        { title: 'Likely strengths', list: data.strengths },
+        { title: 'Growth tips', list: data.growth },
+        { title: 'Energizing environments', list: data.environment }
+      ].map((card) => `
+        <article class="info-card">
+          <h3>${card.title}</h3>
+          <ul>${card.list.map((item) => `<li>${item}</li>`).join('')}</ul>
+        </article>
+      `).join('');
+
+      showScreen('result');
+    }
+
+    function resultSummaryText() {
+      const result = calculateResult();
+      const data = result.type || typeData.INTJ;
+      const lines = [
+        `16 Personalities Evaluation Result`,
+        `Type: ${result.code} — ${data.title}`,
+        data.summary,
+        '',
+        'Preference balance:'
+      ];
+      result.balances.forEach((b) => lines.push(`- ${b.left}/${b.right}: ${b.leftPct}% ${b.leftLabel}, ${b.rightPct}% ${b.rightLabel}`));
+      lines.push('', 'Note: Educational MBTI-style reflection tool, not the official MBTI instrument.');
+      return lines.join('\n');
+    }
+
+    async function copySummary() {
+      const text = resultSummaryText();
+      try {
+        await navigator.clipboard.writeText(text);
+        toast('Summary copied.');
+      } catch (error) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        temp.remove();
+        toast('Summary copied.');
+      }
+    }
+
+    function downloadResult() {
+      const result = calculateResult();
+      const payload = {
+        type: result.code,
+        completedAt: state.completedAt,
+        balances: result.balances.map(({ key, left, right, leftLabel, rightLabel, leftPct, rightPct, raw }) => ({ key, left, right, leftLabel, rightLabel, leftPct, rightPct, raw })),
+        answers: state.answers,
+        disclaimer: 'Educational MBTI-style reflection tool; not the official MBTI instrument.'
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `personality-result-${result.code}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast('Result downloaded.');
+    }
+
+    function renderTypeGrid() {
+      $('introTypeGrid').innerHTML = Object.entries(typeData).map(([code, data]) => `
+        <article class="type-card">
+          <strong>${code}</strong>
+          <span>${data.title}</span>
+          <p>${data.subtitle}</p>
+        </article>
+      `).join('');
+    }
+
+    function saveState() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (error) { /* ignore */ }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : null;
+      } catch (error) { return null; }
+    }
+
+    function clearSaved() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (error) { /* ignore */ }
+    }
+
+    function applyTheme() {
+      let theme = 'light';
+      try { theme = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } catch (error) { theme = 'light'; }
+      document.body.dataset.theme = theme;
+      $('themeBtn').textContent = theme === 'dark' ? '☀️ Theme' : '🌙 Theme';
+    }
+
+    function toggleTheme() {
+      const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.body.dataset.theme = next;
+      $('themeBtn').textContent = next === 'dark' ? '☀️ Theme' : '🌙 Theme';
+      try { localStorage.setItem(THEME_KEY, next); } catch (error) { /* ignore */ }
+    }
+
+    let toastTimer;
+    function toast(message) {
+      clearTimeout(toastTimer);
+      $('toast').textContent = message;
+      $('toast').classList.add('show');
+      toastTimer = setTimeout(() => $('toast').classList.remove('show'), 2400);
+    }
+
+    init();
+  </script>
+</body>
+</html>
